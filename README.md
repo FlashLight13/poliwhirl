@@ -1,3 +1,7 @@
+[![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-Poliwhirl-green.svg?style=flat )]( https://android-arsenal.com/details/1/6380 )
+[![Maven Central]( https://img.shields.io/badge/Maven%20Central-available-brightgreen.svg?style=flat )](https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22poliwhirl%22)
+[![API](https://img.shields.io/badge/API-14%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=14)
+
 # Poliwhirl
 
 <img src="https://cdn.bulbagarden.net/upload/thumb/a/a9/061Poliwhirl.png/250px-061Poliwhirl.png" width="150" height="150">
