@@ -82,7 +82,17 @@ class Poliwhirl {
 
     fun generateOnExecutor(bitmap: Bitmap, callback: Callback, executor: Executor): Request {
         try {
-            return request.execute(bitmap, callback, executor)
+            return request.execute(bitmap, callback, executor, 0)
+        } finally {
+            request = createRequest()
+        }
+    }
+
+    fun generateOnExecutor(bitmap: Bitmap, callback: Callback, executor: Executor,
+                           forceNumThreads: Int): Request {
+        if (forceNumThreads < 0) throw IllegalArgumentException("provide legal threads number")
+        try {
+            return request.execute(bitmap, callback, executor, forceNumThreads)
         } finally {
             request = createRequest()
         }
@@ -127,7 +137,8 @@ class Poliwhirl {
 
         internal fun execute(bitmap: Bitmap,
                              callback: Callback,
-                             executor: Executor): Request {
+                             executor: Executor,
+                             forceNumThreads: Int): Request {
             val verticalBorder = bitmap.height / borderSizeMul
             val horizontalBorder = bitmap.width / borderSizeMul
             updateMultipliers(horizontalBorder, verticalBorder, bitmap.width, bitmap.height)
@@ -135,9 +146,10 @@ class Poliwhirl {
             val start = System.currentTimeMillis()
 
             var currentlyFinishedThreadCount = 0
-            var numThreads = Math.max(0, Math.min(
+
+            var numThreads = if (forceNumThreads <= 0) Math.max(0, Math.min(
                     (executor as? ThreadPoolExecutor)?.maximumPoolSize ?: bitmap.height / accuracy,
-                    MAXIMUM_POOL_SIZE))
+                    MAXIMUM_POOL_SIZE)) else 0
             if (bitmap.height * 2 < numThreads) {
                 numThreads = 1
             }
