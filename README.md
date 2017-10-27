@@ -12,9 +12,9 @@ Here goes the table with the generated colors.
 
 Input | Result
 ------------ | -------------
-<img src="https://github.com/FlashLight13/poliwhirl/blob/dev/images/google_maps_input.png" width="100" height="100"> | <img src="https://github.com/FlashLight13/poliwhirl/blob/dev/images/google_maps_result.png" width="100" height="100">
-<img src="https://github.com/FlashLight13/poliwhirl/blob/dev/images/habr_input.png" width="100" height="100"> | <img src="https://github.com/FlashLight13/poliwhirl/blob/dev/images/habr_result.png" width="100" height="100">
-<img src="https://github.com/FlashLight13/poliwhirl/blob/dev/images/instagram_input.png" width="100" height="100"> | <img src="https://github.com/FlashLight13/poliwhirl/blob/dev/images/instagram_result.png" width="100" height="100">
+<img src="https://github.com/FlashLight13/poliwhirl/blob/master/images/google_maps_input.png" width="100" height="100"> | <img src="https://github.com/FlashLight13/poliwhirl/blob/master/images/google_maps_result.png" width="100" height="100">
+<img src="https://github.com/FlashLight13/poliwhirl/blob/master/images/habr_input.png" width="100" height="100"> | <img src="https://github.com/FlashLight13/poliwhirl/blob/master/images/habr_result.png" width="100" height="100">
+<img src="https://github.com/FlashLight13/poliwhirl/blob/master/images/instagram_input.png" width="100" height="100"> | <img src="https://github.com/FlashLight13/poliwhirl/blob/master/images/instagram_result.png" width="100" height="100">
 
 ## Usage
 Current stable version: 1.0
