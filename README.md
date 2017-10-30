@@ -21,7 +21,7 @@ Input | Result
 <img src="https://github.com/FlashLight13/poliwhirl/blob/master/images/instagram_input.png" width="100" height="100"> | <img src="https://github.com/FlashLight13/poliwhirl/blob/master/images/instagram_result.png" width="100" height="100">
 
 ## Usage
-Current stable version: 1.0
+Current stable version: 1.0.1
 
 ##### Gradle: 
 
