@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.support.annotation.ColorInt
+import android.support.annotation.NonNull
 import android.util.Log
 import com.antonpotapov.util.ColorUtils
 import com.antonpotapov.util.SizeAwareArrayList
@@ -54,7 +55,9 @@ class Poliwhirl {
         }
     }
 
-    var borderSizeMul: Int = 16
+    var verticalBorderSizeMul: Int = 16
+        private set
+    var horizontalBorderSizeMul: Int = 16
         private set
     var minAvailableDistance: Int = 20
         private set
@@ -66,6 +69,7 @@ class Poliwhirl {
         request = createRequest()
     }
 
+    @ColorInt
     fun generate(bitmap: Bitmap): Int {
         var result = 0
         generateOnExecutor(bitmap, object : Callback {
@@ -76,11 +80,12 @@ class Poliwhirl {
         return result
     }
 
-    fun generateAsync(bitmap: Bitmap, callback: Callback) {
+    fun generateAsync(@NonNull bitmap: Bitmap, @NonNull callback: Callback) {
         generateOnExecutor(bitmap, callback, asyncExecutor)
     }
 
-    fun generateOnExecutor(bitmap: Bitmap, callback: Callback, executor: Executor): Request {
+    fun generateOnExecutor(@NonNull bitmap: Bitmap, @NonNull callback: Callback,
+                           @NonNull executor: Executor): Request {
         try {
             return request.execute(bitmap, callback, executor, 0)
         } finally {
@@ -88,8 +93,8 @@ class Poliwhirl {
         }
     }
 
-    fun generateOnExecutor(bitmap: Bitmap, callback: Callback, executor: Executor,
-                           forceNumThreads: Int): Request {
+    fun generateOnExecutor(@NonNull bitmap: Bitmap, @NonNull callback: Callback,
+                           @NonNull executor: Executor, forceNumThreads: Int): Request {
         if (forceNumThreads < 0) throw IllegalArgumentException("provide legal threads number")
         try {
             return request.execute(bitmap, callback, executor, forceNumThreads)
@@ -98,31 +103,74 @@ class Poliwhirl {
         }
     }
 
+    /**
+     * Step size in pixel when processing an image.
+     * For example: if [accuracy] is 3, algorithm will check every 3 pixel
+     */
     fun setAccuracy(accuracy: Int): Poliwhirl {
         this.accuracy = accuracy
         request.accuracy = accuracy
         return this
     }
 
+    /**
+     * Color distance calculated by CIEDE2000 formula. Colors with delta < minAvailableDistance
+     * will be processed as the same
+     */
     fun setMinAvailableColorDistance(minAvailableDistance: Int): Poliwhirl {
+        if (minAvailableDistance < 0) throw IllegalArgumentException("minAvailableDistance should be >= 0")
         this.minAvailableDistance = minAvailableDistance
         request.minAvailableDistance = minAvailableDistance
         return this
     }
 
-    fun setBorderSizeDivideMultiplier(borderSizeMul: Int): Poliwhirl {
-        this.borderSizeMul = borderSizeMul
-        request.borderSizeMul = borderSizeMul
+    /**
+     * Colors on the border of the image have more weight. So, this multiplier determines the size
+     * of this border.
+     * For example: if [borderSizeMul] is 16 than vertical borders will have width=image.width/16
+     *
+     * @see setHorizontalBorderSizeDivideMultiplier
+     */
+    fun setVerticalBorderSizeDivideMultiplier(borderSizeMul: Int): Poliwhirl {
+        if (borderSizeMul <= 1) throw IllegalArgumentException("verticalBorderSizeMul should be > 1")
+        this.verticalBorderSizeMul = borderSizeMul
+        request.verticalBorderSizeMul = borderSizeMul
         return this
     }
 
-    private fun createRequest(): Request = Request(borderSizeMul, minAvailableDistance, accuracy)
+    /**
+     * Colors on the border of the image have more weight. So, this multiplier determines the size
+     * of this border.
+     * For example: if [borderSizeMul] is 16 than horizontal borders will have height=image.height/16
+     *
+     *  @see setVerticalBorderSizeDivideMultiplier
+     */
+    fun setHorizontalBorderSizeDivideMultiplier(borderSizeMul: Int): Poliwhirl {
+        if (borderSizeMul <= 1) throw IllegalArgumentException("horizontalBorderSizeMul should be > 1")
+        this.horizontalBorderSizeMul = borderSizeMul
+        request.horizontalBorderSizeMul = borderSizeMul
+        return this
+    }
 
-    class Request internal constructor(var borderSizeMul: Int,
+    /**
+     * Sets both vertical and horizontal [borderSizeMul]
+     *
+     * @see setVerticalBorderSizeDivideMultiplier
+     * @see setHorizontalBorderSizeDivideMultiplier
+     */
+    fun setBorderSizeDivideMultiplier(borderSizeMul: Int): Poliwhirl {
+        setVerticalBorderSizeDivideMultiplier(borderSizeMul)
+        setHorizontalBorderSizeDivideMultiplier(borderSizeMul)
+        return this
+    }
+
+    private fun createRequest(): Request = Request(verticalBorderSizeMul, horizontalBorderSizeMul,
+            minAvailableDistance, accuracy)
+
+    class Request internal constructor(var verticalBorderSizeMul: Int,
+                                       var horizontalBorderSizeMul: Int,
                                        var minAvailableDistance: Int,
                                        var accuracy: Int) {
-
-
         private var cornersMul: Double = 1.0
         private var borderMul: Double = 1.0
         private var baseMul: Double = 1.0
@@ -139,8 +187,10 @@ class Poliwhirl {
                              callback: Callback,
                              executor: Executor,
                              forceNumThreads: Int): Request {
-            val verticalBorder = bitmap.height / borderSizeMul
-            val horizontalBorder = bitmap.width / borderSizeMul
+            assertAccuracy(bitmap.width, bitmap.height)
+
+            val verticalBorder = bitmap.height / horizontalBorderSizeMul
+            val horizontalBorder = bitmap.width / verticalBorderSizeMul
             updateMultipliers(horizontalBorder, verticalBorder, bitmap.width, bitmap.height)
 
             val start = System.currentTimeMillis()
@@ -186,6 +236,12 @@ class Poliwhirl {
                 }
             }
             return this
+        }
+
+        private fun assertAccuracy(bitmapWidth: Int, bitmapHeight: Int) {
+            if (accuracy > bitmapHeight) throw IllegalArgumentException("accuracy should be <= image height")
+            if (accuracy > bitmapWidth) throw IllegalArgumentException("accuracy should be <= image width")
+            if (accuracy <= 0) throw IllegalArgumentException("accuracy should be > 0")
         }
 
         private fun putColor(colors: SizeAwareArrayList<ColorGroup>, newColor: Int, newColormultiplier: Double) {
@@ -245,12 +301,12 @@ class Poliwhirl {
         /**
          * Adds multiplier for the provided color or adds it to the group if there is no such color yet
          */
-        fun addMultiplier(color: Int, additionalmultiplier: Double): ColorGroup {
+        fun addMultiplier(color: Int, additionalMultiplier: Double): ColorGroup {
             synchronized(colors) {
-                this.multiplier += additionalmultiplier
+                this.multiplier += additionalMultiplier
                 for (colorInGroup in colors) {
                     if (colorInGroup.color == color) {
-                        colorInGroup.colorMultiplier += additionalmultiplier
+                        colorInGroup.colorMultiplier += additionalMultiplier
                         return this
                     }
                 }
