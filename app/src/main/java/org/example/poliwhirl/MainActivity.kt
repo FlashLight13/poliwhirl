@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        borderSizeDivMul.setText(poliwhirl.borderSizeMul.toString())
+        borderSizeDivMul.setText(poliwhirl.verticalBorderSizeMul.toString())
         borderSizeDivMul.addTextChangedListener(object : TextWatcherAdapter() {
             override fun afterTextChanged(s: Editable?) {
                 poliwhirl.setBorderSizeDivideMultiplier(Math.max(1, parse(s.toString())))

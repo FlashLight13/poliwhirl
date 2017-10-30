@@ -89,6 +89,8 @@ dokka {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
+    testCompile 'org.robolectric:robolectric:3.5.1'
+
     compile 'com.android.support:support-annotations:27.0.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
