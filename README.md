@@ -1,5 +1,5 @@
 [![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-Poliwhirl-green.svg?style=flat )]( https://android-arsenal.com/details/1/6380 )
-[![Maven Central]( https://img.shields.io/badge/Maven%20Central-available-brightgreen.svg?style=flat )](https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22poliwhirl%22)
+[![Actual version](https://img.shields.io/maven-central/v/com.antonpotapov/poliwhirl/1.svg)]()
 [![API](https://img.shields.io/badge/API-14%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=14)
 
 # Poliwhirl
@@ -21,8 +21,6 @@ Input | Result
 <img src="https://github.com/FlashLight13/poliwhirl/blob/master/images/instagram_input.png" width="100" height="100"> | <img src="https://github.com/FlashLight13/poliwhirl/blob/master/images/instagram_result.png" width="100" height="100">
 
 ## Usage
-Current stable version: 1.0.1
-
 ##### Gradle: 
 
 `compile 'com.antonpotapov:poliwhirl:$version'`
