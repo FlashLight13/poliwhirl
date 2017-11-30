@@ -51,7 +51,6 @@ class Poliwhirl {
 
         init {
             asyncExecutor.allowCoreThreadTimeOut(true)
-            Executors.newCachedThreadPool()
         }
     }
 
@@ -85,13 +84,8 @@ class Poliwhirl {
     }
 
     fun generateOnExecutor(@NonNull bitmap: Bitmap, @NonNull callback: Callback,
-                           @NonNull executor: Executor): Request {
-        try {
-            return request.execute(bitmap, callback, executor, 0)
-        } finally {
-            request = createRequest()
-        }
-    }
+                           @NonNull executor: Executor): Request =
+            generateOnExecutor(bitmap, callback, executor, 0)
 
     fun generateOnExecutor(@NonNull bitmap: Bitmap, @NonNull callback: Callback,
                            @NonNull executor: Executor, forceNumThreads: Int): Request {
