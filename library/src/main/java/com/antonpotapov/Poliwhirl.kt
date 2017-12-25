@@ -51,6 +51,9 @@ class Poliwhirl {
         request = createRequest()
     }
 
+    /**
+     * Generates color on this thread using current thread executor
+     */
     @ColorInt
     fun generate(bitmap: Bitmap): Int {
         var result = 0
@@ -62,14 +65,26 @@ class Poliwhirl {
         return result
     }
 
+    /**
+     * Generates color in async way on the general single thread executor
+     */
     fun generateAsync(@NonNull bitmap: Bitmap, @NonNull callback: Callback) {
         generateOnExecutor(bitmap, callback, asyncExecutor)
     }
 
+    /**
+     * Generates color on async executor. If [executor] is [ThreadPoolExecutor] calculations will be
+     * processed in parallel on the several threads
+     */
     fun generateOnExecutor(@NonNull bitmap: Bitmap, @NonNull callback: Callback,
                            @NonNull executor: Executor): Request =
             generateOnExecutor(bitmap, callback, executor, 0)
 
+    /**
+     * Generates color on provided executor. This method is the most flexible one.
+     * Here you can provide [forceNumThreads] to split calculations to the separated parts.
+     * It's nice to set the number of parallel threads in provided [executor]
+     */
     fun generateOnExecutor(@NonNull bitmap: Bitmap, @NonNull callback: Callback,
                            @NonNull executor: Executor, forceNumThreads: Int): Request {
         if (forceNumThreads < 0) throw IllegalArgumentException("provide legal threads number")
