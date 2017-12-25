@@ -9,8 +9,9 @@ import android.support.annotation.NonNull
 import android.util.Log
 import com.antonpotapov.util.ColorUtils
 import com.antonpotapov.util.SizeAwareArrayList
-import java.util.concurrent.*
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadPoolExecutor
 
 /**
  * ======================================
@@ -33,25 +34,7 @@ class Poliwhirl {
         private val logTag = "Poliwhirl"
         private val maxPermittedColorsSize = 32
         private val currentThreadExecutor = Executor { it.run() }
-
-        private val CPU_COUNT = Runtime.getRuntime().availableProcessors()
-        // We want at least 2 threads and at most 4 threads in the core pool,
-        // preferring to have 1 less than the CPU count to avoid saturating
-        // the CPU with background work
-        private val CORE_POOL_SIZE = Math.max(2, Math.min(CPU_COUNT - 1, 4))
-        private val MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1
-        private val asyncExecutor = ThreadPoolExecutor(
-                CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, 30.toLong(), TimeUnit.SECONDS,
-                LinkedBlockingQueue<Runnable>(), object : ThreadFactory {
-            private val mCount = AtomicInteger(1)
-
-            override fun newThread(r: Runnable): Thread =
-                    Thread(r, "Poliwhirl processing thread #" + mCount.getAndIncrement())
-        })
-
-        init {
-            asyncExecutor.allowCoreThreadTimeOut(true)
-        }
+        private val asyncExecutor = Executors.newSingleThreadExecutor()
     }
 
     var verticalBorderSizeMul: Int = 16
@@ -192,8 +175,7 @@ class Poliwhirl {
             var currentlyFinishedThreadCount = 0
 
             var numThreads = if (forceNumThreads <= 0) Math.max(0, Math.min(
-                    (executor as? ThreadPoolExecutor)?.maximumPoolSize ?: bitmap.height / accuracy,
-                    MAXIMUM_POOL_SIZE)) else 0
+                    (executor as? ThreadPoolExecutor)?.maximumPoolSize ?: bitmap.height / accuracy, 1)) else 0
             if (bitmap.height * 2 < numThreads) {
                 numThreads = 1
             }
