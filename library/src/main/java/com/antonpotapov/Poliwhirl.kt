@@ -8,7 +8,7 @@ import android.support.annotation.ColorInt
 import android.support.annotation.NonNull
 import android.util.Log
 import com.antonpotapov.util.ColorUtils
-import com.antonpotapov.util.SizeAwareArrayList
+import com.antonpotapov.util.SuperPoliwhirlList
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
@@ -172,7 +172,7 @@ class Poliwhirl {
             val dBorderHeight = height - 2 * borderHeight
             val dBorderWidth = width - 2 * borderWidth
             borderMul = (baseMul * dBorderHeight * dBorderWidth + 1) / (2 * (dBorderHeight * borderHeight + dBorderWidth * borderWidth))
-            cornersMul = (borderMul * (dBorderWidth * borderHeight + dBorderHeight * borderWidth) + 1) / (2 * borderHeight * borderWidth)
+            cornersMul = (baseMul * (dBorderWidth * borderHeight + dBorderHeight * borderWidth) + 1) / (2 * borderHeight * borderWidth)
         }
 
         internal fun execute(bitmap: Bitmap,
@@ -190,7 +190,8 @@ class Poliwhirl {
             var currentlyFinishedThreadCount = 0
 
             var numThreads = if (forceNumThreads <= 0) Math.max(0, Math.min(
-                    (executor as? ThreadPoolExecutor)?.maximumPoolSize ?: bitmap.height / accuracy, 1)) else 0
+                    (executor as? ThreadPoolExecutor)?.maximumPoolSize ?: bitmap.height
+                    / accuracy, 1)) else 0
             if (bitmap.height * 2 < numThreads) {
                 numThreads = 1
             }
@@ -199,7 +200,7 @@ class Poliwhirl {
             val bitmapHeightByThread = bitmap.height / numThreads
             for (threadNumber in 0 until numThreads) {
                 executor.execute {
-                    val colors: SizeAwareArrayList<ColorGroup> = SizeAwareArrayList(maxPermittedColorsSize)
+                    val colors: SuperPoliwhirlList<ColorGroup> = SuperPoliwhirlList(maxPermittedColorsSize)
                     var endX = 0
                     var endY = 0
                     for (y in threadNumber * bitmapHeightByThread
@@ -235,7 +236,7 @@ class Poliwhirl {
             if (accuracy <= 0) throw IllegalArgumentException("accuracy should be > 0")
         }
 
-        private fun putColor(colors: SizeAwareArrayList<ColorGroup>, newColor: Int, newColormultiplier: Double) {
+        private fun putColor(colors: SuperPoliwhirlList<ColorGroup>, newColor: Int, newColormultiplier: Double) {
             val newColorLab = ColorUtils.rgb2lab(Color.red(newColor), Color.green(newColor), Color.blue(newColor))
             for (colorKey in colors) {
                 if (ColorUtils.ciede2000(newColorLab, colorKey.colorLab) <= minAvailableDistance) {
@@ -280,10 +281,11 @@ class Poliwhirl {
      * This class represents color group where colors have close enough [colorLab].
      * Group stores multiple sub-colors and processes their multiplier updates
      */
-    private class ColorGroup(baseColor: Int, val colorLab: DoubleArray, var multiplier: Double) {
+    private class ColorGroup(baseColor: Int, val colorLab: DoubleArray, var multiplier: Double)
+        : Comparable<ColorGroup> {
 
-        private val maxColorsSize = 4
-        private val colors: SizeAwareArrayList<ColorInGroup> = SizeAwareArrayList(maxColorsSize)
+        private val maxColorsSize = 8
+        private val colors: SuperPoliwhirlList<ColorInGroup> = SuperPoliwhirlList(maxColorsSize)
 
         init {
             colors.add(ColorInGroup(baseColor, multiplier))
@@ -314,6 +316,8 @@ class Poliwhirl {
                 return colors.maxBy { it.colorMultiplier }!!.color
             }
         }
+
+        override fun compareTo(other: ColorGroup): Int = multiplier.compareTo(other.multiplier)
     }
 
     /**
@@ -321,12 +325,15 @@ class Poliwhirl {
      *
      * [colorMultiplier] is a multiplier of a particular color in the group
      */
-    private data class ColorInGroup(val color: Int, var colorMultiplier: Double) {
+    private data class ColorInGroup(val color: Int, var colorMultiplier: Double) : Comparable<ColorInGroup> {
         override fun equals(other: Any?): Boolean = (other as ColorInGroup).color == color
         override fun hashCode(): Int {
             var result = color
             result = 31 * result + colorMultiplier.hashCode()
             return result
         }
+
+        override fun compareTo(other: ColorInGroup): Int =
+                colorMultiplier.compareTo(other.colorMultiplier)
     }
 }

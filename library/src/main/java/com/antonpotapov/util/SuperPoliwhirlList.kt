@@ -5,7 +5,7 @@ package com.antonpotapov.util
  * Created by awesome potapov on 23.10.17.
  * ======================================
  */
-class SizeAwareArrayList<T>(private val maxSize: Int) : ArrayList<T>(maxSize) {
+class SuperPoliwhirlList<T : Comparable<T>>(private val maxSize: Int) : ArrayList<T>(maxSize) {
 
     public override fun removeRange(fromIndex: Int, toIndex: Int) {
         super.removeRange(fromIndex, toIndex)
@@ -23,15 +23,21 @@ class SizeAwareArrayList<T>(private val maxSize: Int) : ArrayList<T>(maxSize) {
     }
 
     override fun addAll(elements: Collection<T>): Boolean {
-        throw UnsupportedOperationException("adding collection is unsupported")
+        val result = super.addAll(elements)
+        validateSize()
+        return result
     }
 
     override fun addAll(index: Int, elements: Collection<T>): Boolean {
-        throw UnsupportedOperationException("adding collection is unsupported")
+        val result = super.addAll(index, elements)
+        validateSize()
+        return result
     }
 
     private fun validateSize() {
         if (size == maxSize) {
+            sort()
+            reverse()
             removeRange(maxSize / 2, maxSize)
         }
     }
