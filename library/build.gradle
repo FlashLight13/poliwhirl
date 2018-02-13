@@ -4,7 +4,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka-android'
 
-def versionCodeConst = 3
+def versionCodeConst = 4
 def versionNameConst = "1.0.$versionCodeConst"
 
 android {
