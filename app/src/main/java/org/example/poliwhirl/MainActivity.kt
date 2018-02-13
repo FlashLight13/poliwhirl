@@ -75,13 +75,6 @@ class MainActivity : AppCompatActivity() {
     private fun updatePoliwhirl() {
         val bitmap = bitmap
         if (bitmap != null) {
-
-            poliwhirl.generateAsync(bitmap, object : Poliwhirl.Callback {
-                override fun foundColor(color: Int) {
-                    pictureBackground.setBackgroundColor(color)
-                }
-            })
-
             poliwhirl.generateOnExecutor(bitmap, object : Poliwhirl.Callback {
                 override fun foundColor(color: Int) {
                     pictureBackground.setBackgroundColor(color)
